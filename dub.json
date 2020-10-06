@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"marx-saul"
+	],
+	"copyright": "Copyright © 2020, marx-saul",
+	"description": "A programming language",
+	"license": "MIT License",
+	"name": "bubo"
+}

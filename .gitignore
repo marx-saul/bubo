@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/bubo
+bubo.so
+bubo.dylib
+bubo.dll
+bubo.a
+bubo.lib
+bubo-test-*
+*.exe
+*.o
+*.obj
+*.lst
