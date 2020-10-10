@@ -7,12 +7,14 @@ module token;
 /// define all tokens 
 enum TokenKind : ubyte {
 	error = 0,
-	new_line,				// \n
+	new_line,				// \n and same indent depth
 	inc_indent,				// indent depth + 1
 	dec_indent,				// indent depth - 1
 	end_of_file,			// eof
 	exclam,					// !
 	neq,					// !=
+	nin,					// !in
+	nis,					// !is
 	dollar,					// $
 	mod,					// %
 	mod_ass,				// %=
@@ -32,6 +34,7 @@ enum TokenKind : ubyte {
 	sub,					// -
 	sub_ass,				// -=
 	dec,					// --
+	arrow,					// ->
 	dot,					// .
 	dotdot,					// ..
 	dotdotdot,				// ...
@@ -42,16 +45,20 @@ enum TokenKind : ubyte {
 	ls,						// <
 	leq,					// <=
 	lshift,					// <<
+	lshift_ass,				// <<=
 	ass,					// =
 	eq,						// ==
+	big_arrow,				// =>
 	gt,						// >
 	geq,					// >=
 	rshift,					// >>
+	rshift_ass,				// >>=
 	logical_shift,			// >>>
+	logical_shift_ass,		// >>>=
 	at,						// @
-	lbrack,					// [
-	rbrack,					// ]
-	labmda,					// \
+	lbracket,				// [
+	rbracket,				// ]
+	lambda,					// \
 	xor,					// ^
 	xor_ass,				// ^=
 	xorxor,					// ^^
@@ -61,7 +68,8 @@ enum TokenKind : ubyte {
 	or,						// |
 	or_ass,					// |=
 	oror,					// ||
-	tilda,					// ~
+	pipeline,				// |>
+	tilde,					// ~
 	cat_ass,				// ~=
 	integer,
 	real_number,
@@ -76,6 +84,7 @@ enum TokenKind : ubyte {
 	class_,
 	const_,
 	continue_,
+	def,
 	deprecated_,
 	do_,
 	else_,
@@ -86,20 +95,22 @@ enum TokenKind : ubyte {
 	for_,
 	foreach_,
 	foreach_reverse_,
-	func,
 	goto_,
 	if_,
 	import_,
 	immut,
+	in_,
 	int32,
 	int64,
 	interface_,
 	inout_,
+	is_,
 	lazy_,
 	let,
 	match,
 	mixin_,
 	module_,
+	new_,
 	null_,
 	out_,
 	override_,
@@ -128,6 +139,7 @@ enum TokenKind : ubyte {
 	uint32,
 	uint64,
 	union_,
+	void_,
 	when,
 	while_,
 }
@@ -136,6 +148,8 @@ enum TokenKind : ubyte {
 immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.exclam:				"!",
 	TokenKind.neq:					"!=",
+	TokenKind.nin:					"!in",
+	TokenKind.nis:					"!is",
 	TokenKind.dollar:				"$",
 	TokenKind.mod:					"%",
 	TokenKind.mod_ass:				"%=",
@@ -155,6 +169,7 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.sub:					"-",
 	TokenKind.sub_ass:				"-=",
 	TokenKind.dec:					"--",
+	TokenKind.arrow:				"->",
 	TokenKind.dot:					".",
 	TokenKind.dotdot:				"..",
 	TokenKind.dotdotdot:			"...",
@@ -165,16 +180,20 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.ls:					"<",
 	TokenKind.leq:					"<=",
 	TokenKind.lshift:				"<<",
+	TokenKind.lshift_ass:			"<<=",
 	TokenKind.ass:					"=",
 	TokenKind.eq:					"==",
+	TokenKind.big_arrow:			"=>",
 	TokenKind.gt:					">",
 	TokenKind.geq:					">=",
 	TokenKind.rshift:				">>",
+	TokenKind.rshift_ass:			">>=",
 	TokenKind.logical_shift:		">>>",
+	TokenKind.logical_shift_ass:	">>>=",
 	TokenKind.at:					"@",
-	TokenKind.lbrack:				"[",
-	TokenKind.rbrack:				"]",
-	TokenKind.labmda:				"\\",
+	TokenKind.lbracket:				"[",
+	TokenKind.rbracket:				"]",
+	TokenKind.lambda:				"\\",
 	TokenKind.xor:					"^",
 	TokenKind.xor_ass:				"^=",
 	TokenKind.xorxor:				"^^",
@@ -184,7 +203,8 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.or:					"|",
 	TokenKind.or_ass:				"|=",
 	TokenKind.oror:					"||",
-	TokenKind.tilda:				"~",
+	TokenKind.pipeline:				"|>",
+	TokenKind.tilde:				"~",
 	TokenKind.cat_ass:				"~=",
 	TokenKind.abstract_:			"abstract",
 	TokenKind.as:					"as",
@@ -195,6 +215,7 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.class_:				"class",
 	TokenKind.const_:				"const",
 	TokenKind.continue_:			"continue",
+	TokenKind.def:					"def",
 	TokenKind.deprecated_:			"deprecated",
 	TokenKind.do_:					"do",
 	TokenKind.else_:				"else",
@@ -205,20 +226,22 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.for_:					"for",
 	TokenKind.foreach_:				"foreach",
 	TokenKind.foreach_reverse_:		"foreac_reverse",
-	TokenKind.func:					"func",
 	TokenKind.goto_:				"goto",
 	TokenKind.if_:					"if",
 	TokenKind.import_:				"import",
 	TokenKind.immut:				"immut",
+	TokenKind.in_:					"in",
 	TokenKind.int32:				"int32",
 	TokenKind.int64:				"int64",
 	TokenKind.interface_:			"interface",
 	TokenKind.inout_:				"inout",
+	TokenKind.is_:					"is",
 	TokenKind.lazy_:				"lazy",
 	TokenKind.let:					"let",
 	TokenKind.match:				"match",
 	TokenKind.mixin_:				"mixin",
 	TokenKind.module_:				"module",
+	TokenKind.new_:					"new",
 	TokenKind.null_:				"null",
 	TokenKind.out_:					"out",
 	TokenKind.override_:			"override",
@@ -247,6 +270,7 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.uint32:				"uint32",
 	TokenKind.uint64:				"uint64",
 	TokenKind.union_:				"union",
+	TokenKind.void_:				"void",
 	TokenKind.when:					"when",
 	TokenKind.while_:				"while",
 ];
@@ -255,15 +279,15 @@ immutable string[TokenKind.max+1] token_dictionary = [
  * The location of a token.
  */
 struct Location {
-    string path;			/// full path to the file
     size_t line_num;		/// line number
     size_t index_num;		/// index  number among the current line
+    string path;			/// full path to the file
 	
 	/// convert to string
 	string toString() const {
 		import std.conv: to;
-		import decoration: DECO;
-		return DECO.bold ~ path ~ "(" ~ line_num.to!string ~ ":" ~ index_num.to!string ~ DECO.clear;
+		import decoration: DECO, decorate;
+		return decorate(path ~ "(" ~ line_num.to!string ~ ":" ~ index_num.to!string ~ ")", DECO.bold);
 	}
 }
 

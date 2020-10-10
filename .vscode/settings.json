@@ -1,0 +1,8 @@
+{
+	"dscanner.ignoredKeys": [
+		"dscanner.confusing.function_attributes",
+		"dscanner.suspicious.local_imports",
+		"dscanner.style.undocumented_declaration",
+		"dscanner.style.long_line"
+	]
+}
