@@ -10,6 +10,7 @@ abstract class Visitor {
 	
 	// ast.expression
 	void visit(Expression) { assert(0); }
+	void visit(ErrorExpression) { assert(0); }
 	void visit(UnaryExpression) { assert(0); }
 	void visit(PlusExpression) { assert(0); }
 	void visit(MinusExpression) { assert(0); }
@@ -63,12 +64,15 @@ abstract class Visitor {
 	void visit(MulExpression) { assert(0); }
 	void visit(DivExpression) { assert(0); }
 	void visit(ModExpression) { assert(0); }
+	void visit(ArrowExpression) { assert(0); }
 	void visit(PowExpression) { assert(0); }
 	void visit(DotExpression) { assert(0); }
 	void visit(WhenElseExpression) { assert(0); }
 	void visit(TupleExpression) { assert(0); }
 	void visit(ArrayExpression) { assert(0); }
 	void visit(AssocArrayExpression) { assert(0); }
+	void visit(RecordExpression) { assert(0); }
+	void visit(TypeExpression) { assert(0); }
 	void visit(IntegerExpression) { assert(0); }
 	void visit(RealNumberExpression) { assert(0); }
 	void visit(StringExpression) { assert(0); }
@@ -80,4 +84,41 @@ abstract class Visitor {
 	void visit(ThisExpression) { assert(0); }
 	void visit(SuperExpression) { assert(0); }
 	void visit(DollarExpression) { assert(0); }
+	
+	// ast.statement
+	void visit(Statement x)					{ assert(0); }
+	void visit(ErrorStatement x)			{ assert(0); }
+	void visit(CompoundStatement x)			{ assert(0); }
+	void visit(BreakStatement x)			{ assert(0); }
+	void visit(ContinueStatement x)			{ assert(0); }
+	void visit(DoWhileStatement x)			{ assert(0); }
+	void visit(ExpressionStatement x)		{ assert(0); }
+	void visit(ForStatement x)				{ assert(0); }
+	//void visit(ForeachStatement x)		{ assert(0); }
+	void visit(GotoStatement x)				{ assert(0); }
+	void visit(IfElseStatement x)			{ assert(0); }
+	void visit(ReturnStatement x)			{ assert(0); }
+	void visit(ScopeStatement x)			{ assert(0); }
+	void visit(WhileStatement x)			{ assert(0); }
+		
+	// ast.type
+	void visit(Type x)						{ assert(0); }
+	void visit(ErrorType x)					{ assert(0); }
+	void visit(BasicType x)					{ assert(0); }
+	void visit(NextType x)					{ assert(0); }
+	void visit(DotIdentifierType x)			{ assert(0); }
+	//void visit(DotInstanceType x)			{ assert(0); }
+	void visit(ArrayType x)					{ assert(0); }
+	void visit(AssocArrayType x)			{ assert(0); }
+	void visit(PointerType x)				{ assert(0); }
+	void visit(LazyType x)					{ assert(0); }
+	void visit(IndexType x)					{ assert(0); }
+	void visit(SliceType x)					{ assert(0); }
+	void visit(TupleType x)					{ assert(0); }
+	void visit(RecordType x)				{ assert(0); }
+	void visit(FunctionType x)				{ assert(0); }
+	void visit(NullType x)					{ assert(0); }
+	void visit(TypeofType x)				{ assert(0); }
+	void visit(IdentifierType x)			{ assert(0); }
+	//void visit(InstanceType x)				{ assert(0); }
 }

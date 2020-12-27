@@ -30,7 +30,7 @@ static struct DECO {
 		b_gray			= "\x1b[47m",
 		b_default		= "\x1b[49m",
 		
-		source_code = f_green
+		source_code = f_cyan
 	;
 }
 

@@ -100,6 +100,8 @@ enum TokenKind : ubyte {
 	import_,
 	immut,
 	in_,
+	int8,
+	int16,
 	int32,
 	int64,
 	interface_,
@@ -136,6 +138,8 @@ enum TokenKind : ubyte {
 	typedef_,
 	typeid_,	
 	typeof_,
+	uint8,
+	uint16,
 	uint32,
 	uint64,
 	union_,
@@ -146,6 +150,10 @@ enum TokenKind : ubyte {
 
 /// from TokenKind to the string of the token
 immutable string[TokenKind.max+1] token_dictionary = [
+	TokenKind.new_line:				"__new line__",
+	TokenKind.inc_indent:			"__indent increase__",
+	TokenKind.dec_indent:			"__indent decrease__",
+	TokenKind.end_of_file:			"__EOF__",
 	TokenKind.exclam:				"!",
 	TokenKind.neq:					"!=",
 	TokenKind.nin:					"!in",
@@ -206,6 +214,7 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.pipeline:				"|>",
 	TokenKind.tilde:				"~",
 	TokenKind.cat_ass:				"~=",
+	TokenKind.identifier:			"__identifier__",
 	TokenKind.abstract_:			"abstract",
 	TokenKind.as:					"as",
 	TokenKind.assert_:				"assert",
@@ -231,6 +240,8 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.import_:				"import",
 	TokenKind.immut:				"immut",
 	TokenKind.in_:					"in",
+	TokenKind.int8:					"int8",
+	TokenKind.int16:				"int16",
 	TokenKind.int32:				"int32",
 	TokenKind.int64:				"int64",
 	TokenKind.interface_:			"interface",
@@ -267,6 +278,8 @@ immutable string[TokenKind.max+1] token_dictionary = [
 	TokenKind.typedef_:				"typedef",
 	TokenKind.typeid_:				"typeid",
 	TokenKind.typeof_:				"typeof",
+	TokenKind.uint8:				"uint8",
+	TokenKind.uint16:				"uint16",
 	TokenKind.uint32:				"uint32",
 	TokenKind.uint64:				"uint64",
 	TokenKind.union_:				"union",
@@ -298,4 +311,9 @@ struct Token {
     Location loc;			/// the location of the token
     TokenKind kind;			/// token kind
     string str;				/// string of the token
+	
+	import identifier : Identifier;
+	@property Identifier id() {
+		return Identifier(loc, str);
+	}
 }

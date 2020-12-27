@@ -145,9 +145,12 @@ class Lexer(Range)
 	private long indent_dec = 0;
 	private size_t[] indent_nums = [0];
 	private dchar indent_char = 'x';
+	private bool reachedEOF;
 	/// Lexing. Get the next token.
 	private void _nextToken() {
-		
+		/* ******************************************************************************************************************************
+		 ********************************************************************************************************************************
+		 ******************************************************************************************************************************** */
 		// white spaces
 		pure @nogc @safe bool isSpace(const dchar c) {
 			return c == ' ' || c == '\t';
@@ -195,11 +198,10 @@ class Lexer(Range)
 				nextChar();
 			nextChar();	// get rid of \n
 		}
-		
 		/* ******************************************************************************************************************************
 		 ********************************************************************************************************************************
 		 ******************************************************************************************************************************** */
-		
+		// indent
 		if (indent_dec > 0) {
 			// set token
 			_token.kind = TokenKind.dec_indent;
@@ -209,6 +211,15 @@ class Lexer(Range)
 			// set new indent
 			indent_nums.length -= 1;
 			--indent_dec;
+			return;
+		}
+		// EOF
+		if (reachedEOF) {	
+			// return EOF
+			_token.kind = TokenKind.end_of_file;
+			_token.loc.line_num  = source.line_num;
+			_token.loc.index_num = source.index_num;
+			_token.str = "__EOF__";
 			return;
 		}
 		
@@ -313,11 +324,18 @@ class Lexer(Range)
 				indent_dec = si.length - si2.length;
 				if (si2[$-1] != space_num) {
 					error(Location(source.line_num, source.index_num),
-						"Invalid indent, the number of spaces of this line is " ~ space_num.to!string ~
+						"Invalid indent. The number of indents of this line is " ~ space_num.to!string ~
 						", but previous indent has " ~ si2[$-1].to!string ~ " spaces." ~ 
 						"Indent decreases by " ~ indent_dec.to!string ~ " here."
 					);
 				}
+				
+				// return new line
+				_token.kind = TokenKind.new_line;
+				_token.loc.line_num  = source.line_num;
+				_token.loc.index_num = source.index_num;
+				_token.str = "";
+				return;
 			}
 		}
 
@@ -359,6 +377,8 @@ class Lexer(Range)
 				case "import":				_token.kind = import_;				break;
 				case "immut":				_token.kind = immut;				break;
 				case "in":					_token.kind = in_;					break;
+				case "int8":				_token.kind = int8;					break;
+				case "int16":				_token.kind = int16;				break;
 				case "int32":				_token.kind = int32;				break;
 				case "int64":				_token.kind = int64;				break;
 				case "interface":			_token.kind = interface_;			break;
@@ -395,6 +415,8 @@ class Lexer(Range)
 				case "typedef":				_token.kind = typedef_;				break;
 				case "typeid":				_token.kind = typeid_;				break;
 				case "typeof":				_token.kind = typeof_;				break;
+				case "uint8":				_token.kind = uint8;				break;
+				case "uint16":				_token.kind = uint16;				break;
 				case "uint32":				_token.kind = uint32;				break;
 				case "uint64":				_token.kind = uint64;				break;
 				case "union":				_token.kind = union_;				break;
@@ -734,7 +756,7 @@ class Lexer(Range)
 			}
 			else if (source.character == '-') {
 				nextChar();	 // get rid of -
-				_token.kind = inc;
+				_token.kind = dec;
 				str = "--";
 			}
 			else if (source.character == '>') {
@@ -867,8 +889,14 @@ class Lexer(Range)
 			str = (DECO.reverse ~ "BR" ~ DECO.clear).to!dstring;
 		}
 		else if (source.character == EOF) {
-			_token.kind = end_of_file;
-			str = "EOF";
+			reachedEOF = true;
+			indent_dec = indent_nums.length-1;
+			// return new line
+			_token.kind = TokenKind.new_line;
+			_token.loc.line_num  = source.line_num;
+			_token.loc.index_num = source.index_num;
+			_token.str = "";
+			return;
 		}
 		else {
 			message.error(Location(source.line_num, source.index_num),
@@ -899,8 +927,7 @@ id /*01234 009_124*/ 0xFFf 0x0.aF_f
 ~is_odd![3..$ 4 ..
 	XXXXX YYYYY /- cat the next line
 	ZZZZZ /- 
-	/* */ WWWWW
-`, "main.bb");
+	/* */ WWWWW`, "main.bb");
 	while (lx._token.kind != TokenKind.end_of_file) {
 		writeln(lx._token.kind, "\t", lx._token.str, "\t//\t", lx._token.loc.line_num, ":", lx._token.loc.index_num);
 		//writeln(lx.lookahead.str);

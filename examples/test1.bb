@@ -12,6 +12,5 @@ def main
 	
 	let a = 0;
 	let s = \() {
-		a = 8;
-		return 9;
+		a = 8; return 9
 	} ()

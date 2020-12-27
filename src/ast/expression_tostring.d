@@ -30,17 +30,19 @@ class ExpressionToStringVisitor : GeneralVisitor {
 	}
 	void _accept(Expression exp) {
 		if (exp) exp.accept(this);
-		else result ~= "ERROR".decorate(DECO.reverse);
+		else result ~= "__error__";
 	}
 	
-	override void visit(Expression exp) { assert(0, typeid(exp).toString().decorate(DECO.reverse)); }
+	override void visit(Expression exp) { assert(0, "ExpressionToStringVisitor" ~ typeid(exp).toString().decorate(DECO.reverse)); }
+	override void visit(ErrorExpression exp) {
+		result ~= "__error__";
+	}
 	override void visit(UnaryExpression exp) {
 		lparen(exp);
 		if (exp) {
 			result ~= token_dictionary[exp.op];
 			_accept(exp.next);
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(PostDecExpression exp) {
@@ -49,7 +51,6 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			_accept(exp.next);
 			result ~= "--";
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(PostIncExpression exp) {
@@ -58,7 +59,50 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			_accept(exp.next);
 			result ~= "++";
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
+		rparen(exp);
+	}
+	override void visit(CallExpression exp) {
+		lparen(exp);
+		if (exp) {
+			_accept(exp.func);
+			result ~= "(";
+			foreach (param; exp.params) {
+				_accept(param);
+				result ~= ", ";
+			}
+			if (exp.params.length > 0) result.length -= 2;
+			result ~= ")";
+		}
+		rparen(exp);
+	}
+	override void visit(IndexExpression exp) {
+		lparen(exp);
+		if (exp) {
+			_accept(exp.next);
+			result ~= "[";
+			foreach (param; exp.params) {
+				_accept(param);
+				result ~= ", ";
+			}
+			if (exp.params.length > 0) result.length -= 2;
+			result ~= "]";
+		}
+		rparen(exp);
+	}
+	override void visit(SliceExpression exp) {
+		lparen(exp);
+		if (exp) {
+			_accept(exp.next);
+			result ~= "[";
+			foreach (i; 0 .. exp.params1.length) {
+				_accept(exp.params1[i]);
+				result ~= "..";
+				_accept(exp.params2[i]);
+				result ~= ", ";
+			}
+			if (exp.params1.length > 0) result.length -= 2;
+			result ~= "]";
+		}
 		rparen(exp);
 	}
 	override void visit(BinaryExpression exp) {
@@ -68,7 +112,6 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			result ~= " " ~ token_dictionary[exp.op] ~ " ";
 			_accept(exp.right);
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(BinaryAssignExpression exp) {
@@ -78,20 +121,18 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			result ~= " " ~ token_dictionary[exp.op] ~ "= ";
 			_accept(exp.right);
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(WhenElseExpression exp)	{
 		lparen(exp);
 		if (exp) {
 			result ~= "when ";
-			_accept(exp.condition);
+			_accept(exp.cond);
 			result ~= ": ";
 			_accept(exp.next1);
 			result ~= " else ";
 			_accept(exp.next2);
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(TupleExpression exp) {
@@ -105,7 +146,6 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			if (exp.elems.length > 0) result.length -= 2;
 			result ~= ")";
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(ArrayExpression exp) {
@@ -119,7 +159,6 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			if (exp.elems.length > 0) result.length -= 2;
 			result ~= "]";
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
 	override void visit(AssocArrayExpression exp) {
@@ -135,56 +174,36 @@ class ExpressionToStringVisitor : GeneralVisitor {
 			if (exp.keys.length > 0) result.length -= 2;
 			result ~= "]";
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
 		rparen(exp);
 	}
-	override void visit(IndexExpression exp) {
+	override void visit(RecordExpression exp) {
 		lparen(exp);
+		result ~= "{";
 		if (exp) {
-			result ~= "[";
-			foreach (param; exp.params) {
-				_accept(param);
+			foreach (n, e; exp.record) {
+				result ~= n ~ ":";
+				if (e) e.accept(this);
 				result ~= ", ";
 			}
-			if (exp.params.length > 0) result.length -= 2;
-			result ~= "]";
+			if (exp.record.length > 0) result.length -= 2;
 		}
-		else result ~= "ERROR".decorate(DECO.reverse);
-		rparen(exp);
-	}
-	override void visit(SliceExpression exp) {
-		lparen(exp);
-		if (exp) {
-			result ~= "[";
-			foreach (i; 0 .. exp.params1.length) {
-				_accept(exp.params1[i]);
-				result ~= ": ";
-				_accept(exp.params2[i]);
-				result ~= ", ";
-			}
-			if (exp.params1.length > 0) result.length -= 2;
-			result ~= "]";
-		}
-		else result ~= "ERROR".decorate(DECO.reverse);
+		result ~= "}";
 		rparen(exp);
 	}
 	override void visit(IntegerExpression exp) {
 		if (exp) result ~= exp.str;
-		else result ~= "ERROR".decorate(DECO.reverse);
 	}
 	override void visit(RealNumberExpression exp) {
 		if (exp) result ~= exp.str;
-		else result ~= "ERROR".decorate(DECO.reverse);
 	}
 	override void visit(StringExpression exp) {
 		if (exp) result ~= "`" ~ exp.str ~ "`";
-		else result ~= "ERROR".decorate(DECO.reverse);
 	}
 	override void visit(IdentifierExpression exp) {
-		if (exp)
-			if (exp.is_global) result ~= "." ~ exp.id.name;
-			else result ~= exp.id.name;
-		else result ~= "ERROR".decorate(DECO.reverse);
+		if (exp) {
+			if (exp.is_global) result ~= ".";
+			result ~= exp.id.name;
+		}
 	}
 	override void visit(AnyExpression exp) {
 		result ~= "_";
